@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import "./App.css";
 import Table from "./components/table";
 
+// USED API - HACKER NEWS
+// https://hn.algolia.com/api
 const DEFAULT_QUERY = "redux";
 const PATH_BASE = "https://hn.algolia.com/api/v1";
 const PATH_SEARCH = "/search";
