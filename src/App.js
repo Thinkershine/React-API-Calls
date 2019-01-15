@@ -7,6 +7,8 @@ const PATH_BASE = "https://hn.algolia.com/api/v1";
 const PATH_SEARCH = "/search";
 const PARAM_SEARCH = "query=";
 
+// TEMPLATE LITERALS ES6
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
 
 class App extends Component {
