@@ -26,6 +26,8 @@ class App extends Component {
     this.fetchSearchTopstories = this.fetchSearchTopstories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+
+    this.paprika = "";
   }
 
   setSearchTopstories(result) {
@@ -43,6 +45,12 @@ class App extends Component {
       .then(result => this.setSearchTopstories(result));
   }
 
+  getCoinPaprika() {
+    fetch(`https://api.coinpaprika.com/v1/global`)
+      .then(response => response.json())
+      .then(result => this.setState({ paprika: result }));
+  }
+
   onSearchChange() {
     console.log("CHANGE SEARCH");
   }
@@ -54,17 +62,18 @@ class App extends Component {
   componentDidMount() {
     const { searchTerm } = this.state;
     this.fetchSearchTopstories(searchTerm);
+    this.getCoinPaprika();
   }
 
   render() {
-    const { searchTerm, result } = this.state;
+    const { searchTerm, result, paprika } = this.state;
 
     if (!result) {
       return null;
     }
 
-    console.log("RESUUL", this.state.result);
-
+    console.log("RESULT", this.state.result);
+    console.log("PAPRIKA", this.state.paprika);
     return (
       <div className="App">
         <header>
@@ -78,6 +87,10 @@ class App extends Component {
             onDismiss={this.onDismiss}
           />
         </div>
+        <h3>Paprika</h3>
+        <p>Market CAP: {paprika.market_cap_usd}</p>
+        <p>VOLUME: {paprika.volume_24h_usd}</p>
+        <p>BTC Dominange: {paprika.bitcoin_dominance_percentage}</p>
       </div>
     );
   }
