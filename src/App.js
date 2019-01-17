@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import "./App.css";
 import Table from "./components/table";
+// import Search from "./components/search";
 
 // USED API - HACKER NEWS
 // https://hn.algolia.com/api
-const DEFAULT_QUERY = "redux";
+const DEFAULT_QUERY = "";
 const PATH_BASE = "https://hn.algolia.com/api/v1";
 const PATH_SEARCH = "/search";
 const PARAM_SEARCH = "query=";
@@ -19,19 +20,30 @@ class App extends Component {
 
     this.state = {
       result: null,
+      searchKey: "",
       searchTerm: DEFAULT_QUERY
     };
 
     this.setSearchTopstories = this.setSearchTopstories.bind(this);
     this.fetchSearchTopstories = this.fetchSearchTopstories.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
 
     this.paprika = "";
   }
 
+  componentDidMount() {
+    const { searchTerm } = this.state;
+    this.setState({ searchKey: searchTerm });
+    this.fetchSearchTopstories(searchTerm);
+    this.getCoinPaprika();
+  }
+
   setSearchTopstories(result) {
-    this.setState({ result });
+    const { searchKey } = this.state;
+
+    this.setState({ result, searchKey });
   }
 
   // Method for Fetching Data Through API Call - FETCH API
@@ -51,18 +63,19 @@ class App extends Component {
       .then(result => this.setState({ paprika: result }));
   }
 
-  onSearchChange() {
-    console.log("CHANGE SEARCH");
+  onSearchChange(event) {
+    this.setState({ searchTerm: event.target.value });
+    event.preventDefault();
+  }
+
+  onSearchSubmit(event) {
+    const { searchTerm } = this.state;
+    this.fetchSearchTopstories(searchTerm);
+    event.preventDefault();
   }
 
   onDismiss() {
     console.log("ON DISMISS");
-  }
-
-  componentDidMount() {
-    const { searchTerm } = this.state;
-    this.fetchSearchTopstories(searchTerm);
-    this.getCoinPaprika();
   }
 
   render() {
@@ -72,18 +85,26 @@ class App extends Component {
       return null;
     }
 
-    console.log("RESULT", this.state.result);
-    console.log("PAPRIKA", this.state.paprika);
     return (
       <div className="App">
         <header>
           <h1>Let's Call Some API!</h1>
         </header>
         <div>
+          <Search
+            value={searchTerm}
+            onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}
+          >
+            <p>Search</p>
+          </Search>
+        </div>
+        <div>
           RESULT:
           <Table
             list={result.hits}
-            pattern={searchTerm}
+            //  pattern={searchTerm}
+            //  onSearch={this.onSearchSubmit}
             onDismiss={this.onDismiss}
           />
         </div>
@@ -95,5 +116,12 @@ class App extends Component {
     );
   }
 }
+
+const Search = ({ value, onChange, onSubmit, children }) => (
+  <form onSubmit={onSubmit}>
+    <input type="text" name="name" value={value} onChange={onChange} />
+    <input type="submit" value="SEARCH" />
+  </form>
+);
 
 export default App;
