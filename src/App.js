@@ -21,7 +21,8 @@ class App extends Component {
     this.state = {
       result: null,
       searchKey: "",
-      searchTerm: DEFAULT_QUERY
+      searchTerm: DEFAULT_QUERY,
+      coinSearchPhrase: ""
     };
 
     this.setSearchTopstories = this.setSearchTopstories.bind(this);
@@ -31,6 +32,10 @@ class App extends Component {
     this.onDismiss = this.onDismiss.bind(this);
 
     this.paprika = "";
+    this.coinToDisplay = "";
+    this.coins = "";
+    this.searchCoin = this.searchCoin.bind(this);
+    this.updateSearchPhrase = this.updateSearchPhrase.bind(this);
   }
 
   componentDidMount() {
@@ -38,6 +43,7 @@ class App extends Component {
     this.setState({ searchKey: searchTerm });
     this.fetchSearchTopstories(searchTerm);
     this.getCoinPaprika();
+    this.fetchCoins();
   }
 
   setSearchTopstories(result) {
@@ -57,12 +63,6 @@ class App extends Component {
       .then(result => this.setSearchTopstories(result));
   }
 
-  getCoinPaprika() {
-    fetch(`https://api.coinpaprika.com/v1/global`)
-      .then(response => response.json())
-      .then(result => this.setState({ paprika: result }));
-  }
-
   onSearchChange(event) {
     this.setState({ searchTerm: event.target.value });
     event.preventDefault();
@@ -76,6 +76,51 @@ class App extends Component {
 
   onDismiss() {
     console.log("ON DISMISS");
+  }
+
+  getCoinPaprika() {
+    fetch(`https://api.coinpaprika.com/v1/global`)
+      .then(response => response.json())
+      .then(result => this.setState({ paprika: result }));
+  }
+
+  fetchCoin(ticker) {
+    fetch(`https://api.coinpaprika.com/v1/coins/` + ticker)
+      .then(response => response.json())
+      .then(result => this.setState({ coinToDisplay: result }));
+  }
+
+  fetchCoins() {
+    fetch(`https://api.coinpaprika.com/v1/coins`)
+      .then(response => response.json())
+      .then(result =>
+        this.setState({ coins: result }, () =>
+          console.log("COINS", this.state.coins)
+        )
+      );
+  }
+
+  searchCoin(event) {
+    console.log("NEW COIN", this.state.coinSearchPhrase);
+    this.fetchCoin(this.state.coinSearchPhrase);
+    event.preventDefault();
+  }
+
+  updateSearchPhrase(event) {
+    console.log("SEARCH PHRASE UPDATED", event.target.value);
+    this.setState({ coinSearchPhrase: event.target.value });
+    event.preventDefault();
+  }
+
+  displayCoins() {
+    let coinsToDisplay = "";
+    if (this.state.coins.length > 1) {
+      coinsToDisplay = this.state.coins.map(coin => {
+        return <li key={coin.id}>{coin.name}</li>;
+      });
+    }
+
+    return coinsToDisplay;
   }
 
   render() {
@@ -112,6 +157,18 @@ class App extends Component {
         <p>Market CAP: {paprika.market_cap_usd}</p>
         <p>VOLUME: {paprika.volume_24h_usd}</p>
         <p>BTC Dominange: {paprika.bitcoin_dominance_percentage}</p>
+
+        <form onSubmit={this.searchCoin}>
+          <input
+            type="text"
+            name="name"
+            value={this.state.coinSearchPhrase}
+            onChange={this.updateSearchPhrase}
+          />
+          <input type="submit" value="Search Coin" />
+        </form>
+        <h3>COINS : {this.state.coins != "" && this.state.coins.length}</h3>
+        <ul>{this.displayCoins()}</ul>
       </div>
     );
   }
